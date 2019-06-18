@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -46237,6 +46237,233 @@ module.exports = EventEmitter;
 },{}],3:[function(require,module,exports){
 'use strict';
 
+var _three = require('three');
+
+var THREE = _interopRequireWildcard(_three);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+/**
+ * @author mrdoob / http://mrdoob.com
+ * @author Mugen87 / https://github.com/Mugen87
+ *
+ * Based on @tojiro's vr-samples-utils.js
+ */
+
+var WEBVR = {
+
+	createButton: function createButton(renderer, options) {
+
+		if (options && options.referenceSpaceType) {
+
+			renderer.vr.setReferenceSpaceType(options.referenceSpaceType);
+		}
+
+		function showEnterVR(device) {
+
+			button.style.display = '';
+
+			button.style.cursor = 'pointer';
+			button.style.left = 'calc(50% - 50px)';
+			button.style.width = '100px';
+
+			button.textContent = 'ENTER VR';
+
+			button.onmouseenter = function () {
+				button.style.opacity = '1.0';
+			};
+			button.onmouseleave = function () {
+				button.style.opacity = '0.5';
+			};
+
+			button.onclick = function () {
+
+				device.isPresenting ? device.exitPresent() : device.requestPresent([{ source: renderer.domElement }]);
+			};
+
+			renderer.vr.setDevice(device);
+		}
+
+		function showEnterXR(device) {
+
+			var currentSession = null;
+
+			function onSessionStarted(session) {
+
+				session.addEventListener('end', onSessionEnded);
+
+				renderer.vr.setSession(session);
+				button.textContent = 'EXIT XR';
+
+				currentSession = session;
+			}
+
+			function onSessionEnded(event) {
+
+				currentSession.removeEventListener('end', onSessionEnded);
+
+				renderer.vr.setSession(null);
+				button.textContent = 'ENTER XR';
+
+				currentSession = null;
+			}
+
+			//
+
+			button.style.display = '';
+
+			button.style.cursor = 'pointer';
+			button.style.left = 'calc(50% - 50px)';
+			button.style.width = '100px';
+
+			button.textContent = 'ENTER XR';
+
+			button.onmouseenter = function () {
+				button.style.opacity = '1.0';
+			};
+			button.onmouseleave = function () {
+				button.style.opacity = '0.5';
+			};
+
+			button.onclick = function () {
+
+				if (currentSession === null) {
+
+					navigator.xr.requestSession('immersive-vr').then(onSessionStarted);
+				} else {
+
+					currentSession.end();
+				}
+			};
+		}
+
+		function showVRNotFound() {
+
+			button.style.display = '';
+
+			button.style.cursor = 'auto';
+			button.style.left = 'calc(50% - 75px)';
+			button.style.width = '150px';
+
+			button.textContent = 'VR NOT FOUND';
+
+			button.onmouseenter = null;
+			button.onmouseleave = null;
+
+			button.onclick = null;
+
+			renderer.vr.setDevice(null);
+		}
+
+		function stylizeElement(element) {
+
+			element.style.position = 'absolute';
+			element.style.bottom = '20px';
+			element.style.padding = '12px 6px';
+			element.style.border = '1px solid #fff';
+			element.style.borderRadius = '4px';
+			element.style.background = 'rgba(0,0,0,0.1)';
+			element.style.color = '#fff';
+			element.style.font = 'normal 13px sans-serif';
+			element.style.textAlign = 'center';
+			element.style.opacity = '0.5';
+			element.style.outline = 'none';
+			element.style.zIndex = '999';
+		}
+
+		if ('xr' in navigator && 'supportsSession' in navigator.xr) {
+
+			var button = document.createElement('button');
+			button.style.display = 'none';
+
+			stylizeElement(button);
+
+			navigator.xr.supportsSession('immersive-vr').then(showEnterXR);
+
+			return button;
+		} else if ('getVRDisplays' in navigator) {
+
+			var button = document.createElement('button');
+			button.style.display = 'none';
+
+			stylizeElement(button);
+
+			window.addEventListener('vrdisplayconnect', function (event) {
+
+				showEnterVR(event.display);
+			}, false);
+
+			window.addEventListener('vrdisplaydisconnect', function (event) {
+
+				showVRNotFound();
+			}, false);
+
+			window.addEventListener('vrdisplaypresentchange', function (event) {
+
+				button.textContent = event.display.isPresenting ? 'EXIT VR' : 'ENTER VR';
+			}, false);
+
+			window.addEventListener('vrdisplayactivate', function (event) {
+
+				event.display.requestPresent([{ source: renderer.domElement }]);
+			}, false);
+
+			navigator.getVRDisplays().then(function (displays) {
+
+				if (displays.length > 0) {
+
+					showEnterVR(displays[0]);
+				} else {
+
+					showVRNotFound();
+				}
+			}).catch(showVRNotFound);
+
+			return button;
+		} else {
+
+			var message = document.createElement('a');
+			message.href = 'https://webvr.info';
+			message.innerHTML = 'WEBVR NOT SUPPORTED';
+
+			message.style.left = 'calc(50% - 90px)';
+			message.style.width = '180px';
+			message.style.textDecoration = 'none';
+
+			stylizeElement(message);
+
+			return message;
+		}
+	},
+
+	// DEPRECATED
+
+	checkAvailability: function checkAvailability() {
+		console.warn('WEBVR.checkAvailability has been deprecated.');
+		return new Promise(function () {});
+	},
+
+	getMessageContainer: function getMessageContainer() {
+		console.warn('WEBVR.getMessageContainer has been deprecated.');
+		return document.createElement('div');
+	},
+
+	getButton: function getButton() {
+		console.warn('WEBVR.getButton has been deprecated.');
+		return document.createElement('div');
+	},
+
+	getVRDisplay: function getVRDisplay() {
+		console.warn('WEBVR.getVRDisplay has been deprecated.');
+	}
+
+};
+
+module.exports = { WEBVR: WEBVR };
+
+},{"three":2}],4:[function(require,module,exports){
+'use strict';
+
 /**
  * @author mrdoob / http://mrdoob.com/
  * @author alteredq / http://alteredqualia.com/
@@ -46259,7 +46486,7 @@ module.exports = function (THREE) {
 		this.lookVertical = true;
 		this.autoForward = false;
 
-		this.activeLook = true;
+		this.activeLook = false;
 
 		this.heightSpeed = false;
 		this.heightCoef = 1.0;
@@ -46322,17 +46549,7 @@ module.exports = function (THREE) {
 			event.preventDefault();
 			event.stopPropagation();
 
-			if (this.activeLook) {
-
-				switch (event.button) {
-
-					case 0:
-						this.moveForward = true;break;
-					case 2:
-						this.moveBackward = true;break;
-
-				}
-			}
+			// TODO: add break block here
 
 			this.mouseDragOn = true;
 		};
@@ -46342,31 +46559,20 @@ module.exports = function (THREE) {
 			event.preventDefault();
 			event.stopPropagation();
 
-			if (this.activeLook) {
-
-				switch (event.button) {
-
-					case 0:
-						this.moveForward = false;break;
-					case 2:
-						this.moveBackward = false;break;
-
-				}
-			}
-
 			this.mouseDragOn = false;
 		};
 
 		this.onMouseMove = function (event) {
+			if (this.activeLook) {
+				if (this.domElement === document) {
 
-			if (this.domElement === document) {
+					this.mouseX = event.pageX - this.viewHalfX;
+					this.mouseY = event.pageY - this.viewHalfY;
+				} else {
 
-				this.mouseX = event.pageX - this.viewHalfX;
-				this.mouseY = event.pageY - this.viewHalfY;
-			} else {
-
-				this.mouseX = event.pageX - this.domElement.offsetLeft - this.viewHalfX;
-				this.mouseY = event.pageY - this.domElement.offsetTop - this.viewHalfY;
+					this.mouseX = event.pageX - this.domElement.offsetLeft - this.viewHalfX;
+					this.mouseY = event.pageY - this.domElement.offsetTop - this.viewHalfY;
+				}
 			}
 		};
 
@@ -46396,7 +46602,13 @@ module.exports = function (THREE) {
 					/*R*/this.moveUp = true;break;
 				case 70:
 					/*F*/this.moveDown = true;break;
-
+				case 27:
+					/*ESC*/
+					if (this.activeLook) {
+						this.activeLook = false;
+					} else {
+						this.activeLook = true;
+					}
 			}
 		};
 
@@ -46534,7 +46746,7 @@ module.exports = function (THREE) {
 	};
 };
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 'use strict';
 
 var _scene = require('./scene');
@@ -46544,6 +46756,10 @@ var _scene2 = _interopRequireDefault(_scene);
 var _three = require('three');
 
 var THREE = _interopRequireWildcard(_three);
+
+var _meshes = require('./meshes');
+
+var _meshes2 = _interopRequireDefault(_meshes);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -46568,7 +46784,7 @@ socket.on('introduction', function (_id, _clientNum, _ids) {
   for (var i = 0; i < _ids.length; i++) {
     if (_ids[i] != _id) {
       clients[_ids[i]] = {
-        mesh: new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshNormalMaterial())
+        mesh: _meshes2.default.playerMesh
 
         //Add initial users to the scene
       };glScene.scene.add(clients[_ids[i]].mesh);
@@ -46593,7 +46809,7 @@ socket.on('newUserConnected', function (clientCount, _id, _ids) {
   if (_id != id && !alreadyHasUser) {
     console.log('A new user connected with the id: ' + _id);
     clients[_id] = {
-      mesh: new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshNormalMaterial())
+      mesh: _meshes2.default.playerMesh
 
       //Add initial users to the scene
     };glScene.scene.add(clients[_id].mesh);
@@ -46636,7 +46852,92 @@ socket.on('userPositions', function (_clientProps) {
   }
 });
 
-},{"./scene":5,"three":2}],5:[function(require,module,exports){
+},{"./meshes":6,"./scene":7,"three":2}],6:[function(require,module,exports){
+'use strict';
+
+var _three = require('three');
+
+var THREE = _interopRequireWildcard(_three);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+var facetex = new THREE.TextureLoader().load('./face.png');
+var facemat = new THREE.MeshBasicMaterial({ map: facetex });
+
+function createPlayerMesh(mesh) {
+  var mat = new THREE.MeshBasicMaterial({ color: 0xd6a048 });
+  var geometry = new THREE.BoxGeometry(1, 1, 1);
+  var materials = [mat, mat, mat, mat, facemat, // front
+  mat];
+  var head = new THREE.Mesh(geometry, materials);
+
+  var mat = new THREE.MeshBasicMaterial({ color: 0xd6a048 });
+  geometry = new THREE.BoxGeometry(1, 1.45, 0.45);
+  var materials = [mat, mat, mat, mat, mat, // front
+  mat];
+  var body = new THREE.Mesh(geometry, materials);
+  body.position.y = -1.25;
+
+  var mat = new THREE.MeshBasicMaterial({ color: 0xd6a048 });
+  geometry = new THREE.BoxGeometry(0.5, 1.45, 0.5);
+
+  var materials = [mat, mat, mat, mat, mat, // front
+  mat];
+  var armr = new THREE.Mesh(geometry, materials);
+  armr.position.y = -1.25;
+  armr.position.x = -0.75;
+
+  var mat = new THREE.MeshBasicMaterial({ color: 0xd6a048 });
+  geometry = new THREE.BoxGeometry(0.5, 1.45, 0.5);
+  var materials = [mat, mat, mat, mat, mat, // front
+  mat];
+  var arml = new THREE.Mesh(geometry, materials);
+  arml.position.y = -1.25;
+  arml.position.x = 0.75;
+
+  var mat = new THREE.MeshBasicMaterial({ color: 0xd6a048 });
+  geometry = new THREE.BoxGeometry(0.5, 1.45, 0.5);
+
+  var materials = [mat, mat, mat, mat, mat, // front
+  mat];
+  var legr = new THREE.Mesh(geometry, materials);
+  legr.position.y = -1;
+  var pivotlr = new THREE.Group();
+  pivotlr.add(legr);
+  pivotlr.position.y = -1.70;
+  pivotlr.position.x = -0.25;
+  mat = new THREE.MeshBasicMaterial({ color: 0xd6a048 });
+  geometry = new THREE.BoxGeometry(0.5, 1.45, 0.5);
+
+  var materials = [mat, mat, mat, mat, mat, // front
+  mat];
+  var legl = new THREE.Mesh(geometry, materials);
+  legl.position.y = -1;
+  var pivotll = new THREE.Group();
+  pivotll.add(legl);
+  pivotll.position.y = -1.70;
+  pivotll.position.x = 0.25;
+  mesh.add(head);
+  mesh.add(body);
+  mesh.add(armr);
+  mesh.add(arml);
+  mesh.add(pivotlr);
+  mesh.add(pivotll);
+  mesh.scale.set(0.1, 0.1, 0.1);
+}
+var playerMesh = new THREE.Group();
+createPlayerMesh(playerMesh);
+
+var blocks = {};
+
+var geometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
+var dirttex = new THREE.TextureLoader().load('./dirt.png');
+var dirtmat = new THREE.MeshBasicMaterial({ map: dirttex });
+blocks.dirt = new THREE.Mesh(geometry, dirtmat);
+
+module.exports = { playerMesh: playerMesh, blocks: blocks };
+
+},{"three":2}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -46649,9 +46950,17 @@ var _three = require('three');
 
 var THREE = _interopRequireWildcard(_three);
 
+var _world = require('./world');
+
+var _world2 = _interopRequireDefault(_world);
+
 var _fpscontrols = require('./fpscontrols');
 
 var _fpscontrols2 = _interopRequireDefault(_fpscontrols);
+
+var _WebVR = require('./WebVR');
+
+var WEBVR = _interopRequireWildcard(_WebVR);
 
 var _eventEmitterEs = require('event-emitter-es6');
 
@@ -46711,6 +47020,10 @@ var Scene = function (_EventEmitter) {
 
     _this.renderer.setSize(_this.width, _this.height);
 
+    document.body.appendChild(WEBVR.createButton(renderer));
+
+    renderer.vr.enabled = true;
+
     //Push the canvas to the DOM
     domElement.append(_this.renderer.domElement);
 
@@ -46738,6 +47051,10 @@ var Scene = function (_EventEmitter) {
     _this.scene.add(_this.helperGrid);
     _this.clock = new THREE.Clock();
 
+    _this.world = new _world2.default(_this.scene);
+
+    _this.world.genTemplate("platform", {});
+
     _this.update();
 
     return _this;
@@ -46757,7 +47074,7 @@ var Scene = function (_EventEmitter) {
     value: function update() {
       var _this2 = this;
 
-      requestAnimationFrame(function () {
+      this.renderer.setAnimationLoop(function () {
         return _this2.update();
       });
       this.controls.update(this.clock.getDelta());
@@ -46800,4 +47117,37 @@ var Scene = function (_EventEmitter) {
 
 exports.default = Scene;
 
-},{"./fpscontrols":3,"event-emitter-es6":1,"three":2}]},{},[4]);
+},{"./WebVR":3,"./fpscontrols":4,"./world":8,"event-emitter-es6":1,"three":2}],8:[function(require,module,exports){
+'use strict';
+
+var _three = require('three');
+
+var THREE = _interopRequireWildcard(_three);
+
+var _meshes = require('./meshes');
+
+var _meshes2 = _interopRequireDefault(_meshes);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function World(scene) {
+  this.scene = scene;
+  this.data = { blocks: {} };
+  var scope = this;
+  this.genTemplate = function (template, options) {
+    for (var x = 0; x < 16; x++) {
+      for (var z = 0; z < 16; z++) {
+        this.data.blocks[x + " " + -0.3 + " " + z] = "dirt";
+        var block = _meshes2.default.blocks.dirt;
+        block.position.set(x * 0.1, -0.3, z * 0.1);
+        scope.scene.add(block);
+      }
+    }
+  };
+}
+
+module.exports = World;
+
+},{"./meshes":6,"three":2}]},{},[5]);

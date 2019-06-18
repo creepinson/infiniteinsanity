@@ -1,7 +1,8 @@
 //Three.js
 import * as THREE from 'three';
-
+import World from './world';
 import FirstPersonControls from './fpscontrols';
+import * as WEBVR from './WebVR';
 FirstPersonControls(THREE);
 
 // Event emitter implementation for ES6
@@ -36,9 +37,13 @@ class Scene extends EventEmitter {
 
     this.renderer.setSize(this.width, this.height);
 
+    document.body.appendChild( WEBVR.createButton( renderer ) );
+
+    renderer.vr.enabled = true;
+
     //Push the canvas to the DOM
     domElement.append(this.renderer.domElement);
-
+    
     if(hasControls){
       this.controls = new THREE.FirstPersonControls(this.camera, this.renderer.domElement);
       this.controls.lookSpeed = 0.05;
@@ -55,6 +60,10 @@ class Scene extends EventEmitter {
     this.scene.add(this.helperGrid);
     this.clock = new THREE.Clock();
 
+    this.world = new World(this.scene);
+
+    this.world.genTemplate("platform", {});
+
     this.update();
 
   }
@@ -70,7 +79,7 @@ class Scene extends EventEmitter {
   }
 
   update(){
-    requestAnimationFrame(() => this.update());
+    this.renderer.setAnimationLoop(() => this.update());
     this.controls.update(this.clock.getDelta());
     this.controls.target = new THREE.Vector3(0,0,0);
     this.render();

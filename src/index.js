@@ -1,6 +1,6 @@
 import Scene from './scene';
 import * as THREE from 'three';
-
+import meshes from "./meshes";
 //A socket.io instance
 const socket = io();
 
@@ -20,10 +20,7 @@ socket.on('introduction', (_id, _clientNum, _ids)=>{
   for(let i = 0; i < _ids.length; i++){
     if(_ids[i] != _id){
       clients[_ids[i]] = {
-        mesh: new THREE.Mesh(
-          new THREE.BoxGeometry(1,1,1),
-          new THREE.MeshNormalMaterial()
-        )
+        mesh: meshes.playerMesh
       }
 
       //Add initial users to the scene
@@ -50,10 +47,7 @@ socket.on('newUserConnected', (clientCount, _id, _ids)=>{
   if(_id != id && !alreadyHasUser){
     console.log('A new user connected with the id: ' + _id);
     clients[_id] = {
-      mesh: new THREE.Mesh(
-        new THREE.BoxGeometry(1,1,1),
-        new THREE.MeshNormalMaterial()
-      )
+      mesh: meshes.playerMesh
     }
 
     //Add initial users to the scene

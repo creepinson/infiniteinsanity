@@ -4,20 +4,33 @@
 const express = require('express');
 const app = express();
 
+var fs = require("fs");
+var key = fs.readFileSync('encryption/privkey.pem');
+var cert = fs.readFileSync( 'encryption/cert.crt' );
+var ca = fs.readFileSync( 'encryption/cert.crt' );
+var options = {
+key: key,
+cert: cert,
+ca: ca,
+passphrase: "theo814",
+};
+
+
 ////////HTTP/////////
-const http = require('http').createServer(app);
+const http = require('https').createServer(options, app);
 
 //Port and server setup
-const port = process.env.PORT || 1989;
+const port = process.env.PORT || 443;
 
 //Server
-const server = app.listen(port);
 
 //Console the port
 console.log('Server is running localhost on port: ' + port );
 
 /////SOCKET.IO///////
-const io = require('socket.io').listen(server);
+const io = require('socket.io').listen(http);
+
+http.listen(port);
 
 ////////EJS//////////
 const ejs = require('ejs');

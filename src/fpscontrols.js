@@ -20,7 +20,7 @@ module.exports = (THREE) =>{
 		this.lookVertical = true;
 		this.autoForward = false;
 
-		this.activeLook = true;
+		this.activeLook = false;
 
 		this.heightSpeed = false;
 		this.heightCoef = 1.0;
@@ -88,16 +88,7 @@ module.exports = (THREE) =>{
 			event.preventDefault();
 			event.stopPropagation();
 
-			if ( this.activeLook ) {
-
-				switch ( event.button ) {
-
-					case 0: this.moveForward = true; break;
-					case 2: this.moveBackward = true; break;
-
-				}
-
-			}
+			// TODO: add break block here
 
 			this.mouseDragOn = true;
 
@@ -108,23 +99,14 @@ module.exports = (THREE) =>{
 			event.preventDefault();
 			event.stopPropagation();
 
-			if ( this.activeLook ) {
-
-				switch ( event.button ) {
-
-					case 0: this.moveForward = false; break;
-					case 2: this.moveBackward = false; break;
-
-				}
-
-			}
+			
 
 			this.mouseDragOn = false;
 
 		};
 
 		this.onMouseMove = function ( event ) {
-
+			if(this.activeLook){
 			if ( this.domElement === document ) {
 
 				this.mouseX = event.pageX - this.viewHalfX;
@@ -136,7 +118,7 @@ module.exports = (THREE) =>{
 				this.mouseY = event.pageY - this.domElement.offsetTop - this.viewHalfY;
 
 			}
-
+			}
 		};
 
 		this.onKeyDown = function ( event ) {
@@ -159,7 +141,12 @@ module.exports = (THREE) =>{
 
 				case 82: /*R*/ this.moveUp = true; break;
 				case 70: /*F*/ this.moveDown = true; break;
-
+				case 27: /*ESC*/ 
+					if ( this.activeLook ) {
+                                		this.activeLook = false;
+                       			} else {
+                                		this.activeLook = true;
+                      			}
 			}
 
 		};
