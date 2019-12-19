@@ -2,7 +2,9 @@
 import * as THREE from 'three';
 import World from './world';
 import FirstPersonControls from './fpscontrols';
-import * as WEBVR from './WebVR';
+import { WEBVR } from './WebVR';
+import VRController from 'three-vrcontroller-module';
+
 FirstPersonControls(THREE);
 
 // Event emitter implementation for ES6
@@ -37,9 +39,11 @@ class Scene extends EventEmitter {
 
     this.renderer.setSize(this.width, this.height);
 
-    document.body.appendChild( WEBVR.createButton( renderer ) );
+    document.body.appendChild( WEBVR.createButton( this.renderer ) );
 
-    renderer.vr.enabled = true;
+    this.renderer.vr.enabled = true;
+
+    
 
     //Push the canvas to the DOM
     domElement.append(this.renderer.domElement);
@@ -54,6 +58,32 @@ class Scene extends EventEmitter {
     domElement.addEventListener('mouseenter', e => this.onEnterCanvas(e), false);
     domElement.addEventListener('mouseleave', e => this.onLeaveCanvas(e), false);
     window.addEventListener('keydown', e => this.onKeyDown(e), false);
+
+    var scope = this;
+
+    window.addEventListener('vr controller connected', function(event){
+	var controller = event.detail;
+        scope.scene.add(controller);
+	controller.standingMatrix = scope.renderer.vr.getStandingMatrix();
+        controller.head = scope.camera;
+        controller.addEventListener("disconnected", function(event){
+            controller.parent.remove(controller);
+        });
+
+        var controllerMat = new THREE.MeshStandardMaterial({ color: 0xF3C20D});
+
+	var controllerMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.005, 0.05, 0.1, 6), controllerMat);
+        controllerMat.flatShading = true;
+        controllerMesh.rotation.x = -Math.PI / 2;
+        controller.userData.mesh = controllerMesh;
+        controller.add(controllerMesh);
+
+        controller.addEventListener("primary press began", function(event){
+	    scope.camera.translateZ(5);
+            event.target.userData.mesh.material.color.setHex(0xDB3236);
+            console.log("Primary press");
+        });
+    });
 
     this.helperGrid = new THREE.GridHelper( 10, 10 );
     this.helperGrid.position.y = -0.5;
@@ -79,13 +109,14 @@ class Scene extends EventEmitter {
   }
 
   update(){
-    this.renderer.setAnimationLoop(() => this.update());
+    requestAnimationFrame(() => this.update());
     this.controls.update(this.clock.getDelta());
     this.controls.target = new THREE.Vector3(0,0,0);
     this.render();
-  }
+}
 
   render() {
+    VRController.update();
     this.renderer.render(this.scene, this.camera);
   }
 

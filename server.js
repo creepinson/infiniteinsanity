@@ -3,6 +3,7 @@
 //////EXPRESS////////
 const express = require('express');
 const app = express();
+const database = require("./data.js");
 
 var fs = require("fs");
 var key = fs.readFileSync('encryption/privkey.pem');
@@ -20,9 +21,21 @@ passphrase: "theo814",
 const http = require('https').createServer(options, app);
 
 //Port and server setup
-const port = process.env.PORT || 443;
+const port = 443;
 
 //Server
+let userRef = database.database.collection('users').doc('creepinson');
+let getDoc = userRef.get()
+  .then(doc => {
+    if (!doc.exists) {
+      console.log('No such document!');
+    } else {
+      console.log('creepinson data:', doc.data());
+    }
+  })
+  .catch(err => {
+    console.log('Error getting document', err);
+  });
 
 //Console the port
 console.log('Server is running localhost on port: ' + port );

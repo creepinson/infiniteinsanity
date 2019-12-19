@@ -1,0 +1,243 @@
+//Three.js
+import * as THREE from 'three';
+import World from './world';
+import FirstPersonControls from './fpscontrols';
+import { WEBVR } from './WebVR';
+import "three-vrcontroller-module";
+
+FirstPersonControls(THREE);
+
+// Event emitter implementation for ES6
+import EventEmitter from 'event-emitter-es6';
+
+class Scene extends EventEmitter {
+  constructor(domElement = document.getElementById('gl_context'),
+              _width = window.innerWidth,
+              _height = window.innerHeight,
+              hasControls = true,
+              clearColor = 'black'){
+
+    //Since we extend EventEmitter we need to instance it from here
+    super();
+
+    //THREE scene
+    this.scene = new THREE.Scene();
+
+    //Utility
+    this.width = _width;
+    this.height = _height;
+
+    //THREE Camera
+    this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 0.1, 1000);
+
+    //THREE WebGL renderer
+    this.renderer = new THREE.WebGLRenderer({
+      antialiasing: true
+    });
+
+    this.renderer.setClearColor(new THREE.Color(clearColor));
+
+    this.renderer.setSize(this.width, this.height);
+
+    document.body.appendChild( WEBVR.createButton( this.renderer ) );
+
+    this.renderer.vr.enabled = true;
+
+    
+
+    //Push the canvas to the DOM
+    domElement.append(this.renderer.domElement);
+    
+    if(hasControls){
+      this.controls = new THREE.FirstPersonControls(this.camera, this.renderer.domElement);
+      this.controls.lookSpeed = 0.05;
+    }
+
+    //Setup event listeners for events and handle the states
+    window.addEventListener('resize', e => this.onWindowResize(e), false);
+    domElement.addEventListener('mouseenter', e => this.onEnterCanvas(e), false);
+    domElement.addEventListener('mouseleave', e => this.onLeaveCanvas(e), false);
+    window.addEventListener('keydown', e => this.onKeyDown(e), false);
+
+    
+
+
+    this.helperGrid = new THREE.GridHelper( 10, 10 );
+window.addEventListener( 'vr controller connected', function( event ){
+    this.helperGrid.position.y = -0.5;
+
+    this.scene.add(this.helperGrid);
+
+    this.clock = new THREE.Clock();
+	//  Here it is, your VR controller instance.
+
+    this.world = new World(this.scene);
+	//  Its really a THREE.Object3D so you can just add it to your scene:
+
+    this.world.genTemplate("platform", {});
+
+
+    this.update();
+	var controller = event.detail
+
+  }
+
+  drawUsers(positions, id){
+	scene.add( controller )
+    for(let i = 0; i < Object.keys(positions).length; i++){
+
+      if(Object.keys(positions)[i] != id){
+
+        this.users[i].position.set(positions[Object.keys(positions)[i]].position[0],
+	//  HEY HEY HEY! This is important. You need to make sure you do this.
+                                   positions[Object.keys(positions)[i]].position[1],
+	//  For standing experiences (not seated) we need to set the standingMatrix
+                                   positions[Object.keys(positions)[i]].position[2]);
+	//  otherwise youll wonder why your controller appears on the floor
+      }
+    }
+  }
+
+  update(){
+	//  instead of in your hands! And for seated experiences this will have no
+    requestAnimationFrame(() => this.update());
+	//  effect, so safe to do either way:
+    this.controls.update(this.clock.getDelta());
+
+    this.controls.target = new THREE.Vector3(0,0,0);
+	controller.standingMatrix = renderer.vr.getStandingMatrix()
+    this.render();
+
+}
+
+  render() {
+
+    THREE.VRController.update();
+	//  And for 3DOF (seated) controllers you need to set the controller.head
+    this.renderer.render(this.scene, this.camera);
+	//  to reference your camera. That way we can make an educated guess where
+  }
+
+  onWindowResize(e) {
+	//  your hand ought to appear based on the cameras rotation.
+    this.width = window.innerWidth;
+
+    this.height = Math.floor(window.innerHeight - (window.innerHeight * 0.3));
+	controller.head = window.camera
+    this.camera.aspect = this.width / this.height;
+
+    this.camera.updateProjectionMatrix();
+
+    this.renderer.setSize(this.width, this.height);
+	//  Right now your controller has no visual.
+  }
+
+  onLeaveCanvas(e){
+	//  Its just an empty THREE.Object3D.
+    this.controls.enabled = false;
+	//  Lets fix that!
+  }
+  onEnterCanvas(e){
+
+    this.controls.enabled = true;
+	var
+  }
+  onKeyDown(e){
+	meshColorOff = 0xDB3236,//  Red.
+    this.emit('userMoved');
+	meshColorOn  = 0xF4C20D,//  Yellow.
+  }
+}
+
+export default Scene;
+	controllerMaterial = new THREE.MeshStandardMaterial({
+
+
+		color: meshColorOff
+
+	}),
+
+	controllerMesh = new THREE.Mesh(
+
+
+		new THREE.CylinderGeometry( 0.005, 0.05, 0.1, 6 ),
+
+		controllerMaterial
+
+	),
+
+	handleMesh = new THREE.Mesh(
+
+
+		new THREE.BoxGeometry( 0.03, 0.1, 0.03 ),
+
+		controllerMaterial
+
+	)
+
+
+	controllerMaterial.flatShading = true
+
+	controllerMesh.rotation.x = -Math.PI / 2
+
+	handleMesh.position.y = -0.05
+
+	controllerMesh.add( handleMesh )
+
+	controller.userData.mesh = controllerMesh//  So we can change the color later.
+
+	controller.add( controllerMesh )
+
+	castShadows( controller )
+
+	receiveShadows( controller )
+
+
+
+	//  Allow this controller to interact with DAT GUI.
+
+
+	var guiInputHelper = dat.GUIVR.addInputObject( controller )
+
+	scene.add( guiInputHelper )
+
+
+
+	//  Button events. How easy is this?!
+
+	//  Well just use the primary button -- whatever that might be ;)
+
+	//  Check out the THREE.VRController.supported{} object to see
+
+	//  all the named buttons weve already mapped for you!
+
+
+	controller.addEventListener( 'primary press began', function( event ){
+
+
+		event.target.userData.mesh.material.color.setHex( meshColorOn )
+
+		guiInputHelper.pressed( true )
+
+	})
+
+	controller.addEventListener( 'primary press ended', function( event ){
+
+
+		event.target.userData.mesh.material.color.setHex( meshColorOff )
+
+		guiInputHelper.pressed( false )
+
+	})
+
+
+
+	//  Daddy, what happens when we die?
+
+
+	controller.addEventListener( 'disconnected', function( event ){
+
+
+		controller.parent.remove( controller )
+
+	})

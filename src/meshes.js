@@ -106,7 +106,7 @@ createPlayerMesh(playerMesh);
 
 var blocks = {};
 
-var geometry = new THREE.BoxGeometry( 0.1, 0.1, 0.1 );
+var geometry = new THREE.BoxGeometry( 0.5, 0.5, 0.5 );
 const dirttex = new THREE.TextureLoader().load('./dirt.png');
 const dirtmat = new THREE.MeshBasicMaterial({ map: dirttex });
 blocks.dirt = new THREE.Mesh( geometry, dirtmat );

@@ -1,6 +1,7 @@
 import Scene from './scene';
 import * as THREE from 'three';
 import meshes from "./meshes";
+
 //A socket.io instance
 const socket = io();
 
@@ -10,13 +11,14 @@ let id;
 let instances = [];
 let clients = new Object();
 
+
 glScene.on('userMoved', ()=>{
   socket.emit('move', [glScene.camera.position.x, glScene.camera.position.y, glScene.camera.position.z]);
 });
 
 //On connection server sends the client his ID
 socket.on('introduction', (_id, _clientNum, _ids)=>{
-
+  
   for(let i = 0; i < _ids.length; i++){
     if(_ids[i] != _id){
       clients[_ids[i]] = {

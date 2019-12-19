@@ -14,11 +14,14 @@
     "ejs": "^2.5.7",
     "event-emitter-es6": "^1.1.5",
     "express": "^4.16.2",
+    "firebase-admin": "^8.2.0",
     "firebase-functions": "^3.0.1",
     "gsap": "^1.20.3",
     "http": "0.0.0",
+    "mongoose": "^5.6.1",
     "socket.io": "^2.0.4",
-    "three": "^0.89.0"
+    "three": "^0.89.0",
+    "three-vrcontroller-module": "^1.0.5"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",
