@@ -1,24 +1,22 @@
 {
-  "name": "death_gl",
+  "name": "infinite-insanity",
   "version": "0.0.1",
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "start": "concurrently \"nodemon server.js\" \"watchify src/index.js -o public/js/bundle.js -v\"",
-    "build": "browserify src/index.js | uglifyjs -mc warnings=false > public/js/bundle.min.js",
-    "test": "npm run build"
+    "start": "npm run build && npm run server",
+    "server": "node server.js",
+    "build": "browserify src/index.js > public/js/bundle.js"
   },
-  "author": "Or Fleisher <contact@orfleisher.com>",
+  "author": "Theo Paris",
   "license": "MIT",
   "dependencies": {
     "ejs": "^2.5.7",
     "event-emitter-es6": "^1.1.5",
     "express": "^4.16.2",
-    "firebase-admin": "^8.2.0",
-    "firebase-functions": "^3.0.1",
     "gsap": "^1.20.3",
     "http": "0.0.0",
-    "mongoose": "^5.6.1",
+    "monk": "^7.2.0",
     "socket.io": "^2.0.4",
     "three": "^0.89.0",
     "three-vrcontroller-module": "^1.0.5"
@@ -31,7 +29,6 @@
     "concurrently": "^3.5.1",
     "glslify": "^6.1.0",
     "nodemon": "^1.14.12",
-    "uglify-js": "^3.3.9",
     "watchify": "^3.10.0"
   },
   "browserify": {

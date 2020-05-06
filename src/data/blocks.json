@@ -1,0 +1,8 @@
+{
+  "dirt": {
+    "material": {
+        "type": "basic",
+        "texture": "assets/dirt.png"
+    }
+  }
+}
