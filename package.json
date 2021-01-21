@@ -17,7 +17,7 @@
     "gsap": "^1.20.3",
     "http": "0.0.0",
     "monk": "^7.2.0",
-    "socket.io": "^2.0.4",
+    "socket.io": "^2.4.0",
     "three": "^0.89.0",
     "three-vrcontroller-module": "^1.0.5"
   },
